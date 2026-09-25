@@ -1,0 +1,44 @@
+# -----------------------------
+# Secrets & Environment Variables
+# -----------------------------
+.env
+
+# -----------------------------
+# Virtual Environments
+# -----------------------------
+venv/
+.venv/
+env/
+ENV/
+
+# -----------------------------
+# Python Cache & Bytecode
+# -----------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# -----------------------------
+# Databases
+# -----------------------------
+# Ignore local SQLite databases if we are using them for dev
+# *.db
+# *.sqlite3
+
+# -----------------------------
+# IDEs & OS Files
+# -----------------------------
+.vscode/
+.idea/
+__MACOSX/
+.DS_Store
+Thumbs.db
+
+# -----------------------------
+# Logs & Testing
+# -----------------------------
+*.log
+.pytest_cache/
+.coverage
+htmlcov/
