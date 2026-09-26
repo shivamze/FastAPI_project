@@ -27,3 +27,17 @@ class ExpenseRead(BaseModel):
     expense_date: date
     
     model_config = ConfigDict(from_attributes=True)
+
+class CategoryTotal(BaseModel):
+    category: str
+    total: float
+
+class DailyTrend(BaseModel):
+    date: date
+    total: float
+
+class DashboardSummary(BaseModel):
+    current_month_total: float
+    category_breakdown: List[CategoryTotal]
+    daily_trend: List[DailyTrend]
+    recent_transactions: List[ExpenseRead]

@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import func, desc
 from datetime import date
 from fastapi import HTTPException
 from app.db.models.expenseModel import Expense
@@ -54,3 +55,45 @@ def delete_expense(session: Session, expense_id: int, current_user: User):
     session.delete(db_expense)
     session.commit()
     return {"message": "Expense deleted successfully"}
+
+def get_dashboard_summary(session: Session, current_user: User):
+    # Get the first day of the current month
+    today = date.today()
+    start_of_month = today.replace(day=1)
+
+    # 1. Core KPI: Total spent this month
+    month_total = session.query(func.sum(Expense.amount)).filter(
+        Expense.user_id == current_user.id,
+        Expense.expense_date >= start_of_month
+    ).scalar() or 0.0
+
+    # 2. Pie Chart Data: Category breakdown for this month
+    category_data = session.query(
+        Expense.category, 
+        func.sum(Expense.amount).label("total")
+    ).filter(
+        Expense.user_id == current_user.id,
+        Expense.expense_date >= start_of_month
+    ).group_by(Expense.category).all()
+
+    # 3. Line Graph Data: Daily trend for this month
+    daily_data = session.query(
+        Expense.expense_date, 
+        func.sum(Expense.amount).label("total")
+    ).filter(
+        Expense.user_id == current_user.id,
+        Expense.expense_date >= start_of_month
+    ).group_by(Expense.expense_date).order_by(Expense.expense_date).all()
+
+    # 4. Feed: 5 most recent transactions (overall)
+    recent = session.query(Expense).filter(
+        Expense.user_id == current_user.id
+    ).order_by(desc(Expense.expense_date)).limit(5).all()
+
+    # Format the raw database rows to match our Pydantic schemas
+    return {
+        "current_month_total": month_total,
+        "category_breakdown": [{"category": row.category.value, "total": row.total} for row in category_data],
+        "daily_trend": [{"date": row.expense_date, "total": row.total} for row in daily_data],
+        "recent_transactions": recent
+    }
