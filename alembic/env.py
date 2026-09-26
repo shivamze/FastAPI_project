@@ -5,6 +5,7 @@ from sqlalchemy import pool
 
 from app.db.models.userModel import User
 from app.db.models.refreshModel import RefreshToken
+from app.db.models.expenseModel import Expense
 from app.db.database import Base, engine
 from app.core.config import settings
 
