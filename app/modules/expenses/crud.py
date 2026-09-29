@@ -1,8 +1,9 @@
 from sqlalchemy.orm import Session
+from typing import Optional
 from sqlalchemy import func, desc
 from datetime import date
 from fastapi import HTTPException
-from app.db.models.expenseModel import Expense
+from app.db.models.expenseModel import Expense, CategoryEnum
 from app.modules.expenses.schemas import ExpenseCreate, ExpenseUpdate, ExpenseRead
 from app.db.models.userModel import User
 
@@ -21,11 +22,26 @@ def create_expense(session: Session, expense_data: ExpenseCreate, current_user: 
     session.refresh(new_expense)
     return new_expense
 
-def read_expense(session: Session, current_user: User, skip: int = 0, limit: int = 5):
+def read_expense(
+        session: Session, 
+        current_user: User, 
+        skip: int = 0, 
+        limit: int = 5,
+        start_date: Optional[date] = None,
+        end_date: Optional[date] = None,
+        category: Optional[CategoryEnum] = None
+    ):
 
-    expenses = session.query(Expense).filter(Expense.user_id == current_user.id).offset(skip).limit(limit).all()
+    query = session.query(Expense).filter(Expense.user_id == current_user.id)
 
-    return expenses
+    if start_date:
+        query = query.filter(Expense.expense_date >= start_date)
+    if end_date:
+        query = query.filter(Expense.expense_date <= end_date)
+    if category:
+        query = query.filter(Expense.category == category)
+
+    return query.order_by(desc(Expense.expense_date)).offset(skip).limit(limit).all()
 
 def update_expense(session: Session, expense_id: int, expense_data: ExpenseUpdate, current_user: User):
     db_expense = session.query(Expense).filter(Expense.id == expense_id).first()

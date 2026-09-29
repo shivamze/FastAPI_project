@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 # from app.db.database import SessionLocal
 from app.modules.auth.router import router as auth_router
 from app.modules.expenses.router import router as expense_router
+from app.modules.savings.router import router as savings_router
 
 app = FastAPI(
     title="Authentication check",
@@ -19,6 +20,7 @@ app.add_middleware(
 
 app.include_router(auth_router)
 app.include_router(expense_router)
+app.include_router(savings_router)
 
 @app.get("/health")
 def health_check():
